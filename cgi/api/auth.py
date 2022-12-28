@@ -90,18 +90,3 @@ print( f'''{{
   "token_type": "Bearer",
   "expires": "{access_token.expires}"
 }} ''', end='' )
-
-
-# An example of such a (https://datatracker.ietf.org/doc/html/rfc6750 page 9)
-#    response is:
-
-#      HTTP/1.1 200 OK
-#      Content-Type: application/json;charset=UTF-8
-#      Cache-Control: no-store
-#      Pragma: no-cache
-#      {
-#        "access_token":"mF_9.B5f-4.1JqM",
-#        "token_type":"Bearer",
-#        "expires_in":3600,
-#        "refresh_token":"tGzv3JOkF0XG5Qx2TlKWIA"
-#      }
