@@ -1,0 +1,6 @@
+[Wed Dec 28 15:23:38.096591 2022] [cgi:error] [pid 6276:tid 1908] (OS 2)The system cannot find the file specified.  : [client ::1:49975] couldn't create child process: 720002: index.py
+[Wed Dec 28 15:23:38.097586 2022] [cgi:error] [pid 6276:tid 1908] (OS 2)The system cannot find the file specified.  : [client ::1:49975] AH01223: couldn't spawn child process: C:/Users/Lin/Documents/Python/cgi/index.py
+[Wed Dec 28 15:28:08.437056 2022] [cgi:error] [pid 6276:tid 1904] (OS 2)The system cannot find the file specified.  : [client ::1:49994] couldn't create child process: 720002: index.py
+[Wed Dec 28 15:28:08.437056 2022] [cgi:error] [pid 6276:tid 1904] (OS 2)The system cannot find the file specified.  : [client ::1:49994] AH01223: couldn't spawn child process: C:/Users/Lin/Documents/Python/cgi/index.py
+[Wed Dec 28 15:28:13.248583 2022] [cgi:error] [pid 6276:tid 1908] (OS 2)The system cannot find the file specified.  : [client ::1:49995] couldn't create child process: 720002: index.py
+[Wed Dec 28 15:28:13.248583 2022] [cgi:error] [pid 6276:tid 1908] (OS 2)The system cannot find the file specified.  : [client ::1:49995] AH01223: couldn't spawn child process: C:/Users/Lin/Documents/Python/cgi/index.py

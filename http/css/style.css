@@ -1,3 +1,10 @@
 body{
-    background-color: aqua;
+    background-color: rgb(255, 246, 239);
+}
+h1{
+    color: rgb(94, 79, 67)
+}
+label{
+    color:rgb(94, 79, 67);
+    
 }
