@@ -2,28 +2,42 @@
 
 
 import os
+import cgi, cgitb
 
+import json
 
+    
 envs = "<ul>" + ''.join( f"<li>{k} = {v}</li>" for k,v in os.environ.items() ) + "</ul>"
 
+json_object = json.dumps(envs)
+
+with open("environ_items.json", "w") as outfile:
+        outfile.write(json_object)
+        
 html = f"""<!doctype html />
 <html>
 <head>
 </head>
 <body>
     <h1>Hello </h1>
-    
+    {envs}
+   
+ <form action = "x=10&y=20" method = "get">
+    GET METHODS <input type = "submit" value = "Submit" />
+</form>
+</form>
 </body>
 </html>"""
 
 
-                                      
+                                 
 print( "Content-Type: text/html; charset=utf-8" )    # далі ідуть заголовки
 print( f"Content-Length: {len(html)}" )
 print( "" )                           # тіло відокремлюється порожнім рядком
 print( html )                         # далі іде тіло. За наявності тіла вимагається наявність
                                       # заголовків Content-Type: та Content-Length:
-                                      # Через потребу Content-Length тіло формують окремо
+
+                                  # Через потребу Content-Length тіло формують окремо
 
 
 # Налагодження:
