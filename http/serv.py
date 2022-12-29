@@ -13,7 +13,7 @@ class DbService :
 
     def get_connection( self ) -> mysql.connector.MySQLConnection :
         if DbService.__connection is None or not DbService.__connection.is_connected() :
-            # print( db.conf )
+            print( db.conf )
             try :
                 DbService.__connection = mysql.connector.connect( **db.conf )
             except mysql.connector.Error as err :
@@ -26,8 +26,8 @@ class DaoService :
 
     def __init__( self, db_service ) -> None:
         self.__db_service: DbService = db_service
-        self.__user_dao: dao.UserDAO = None                  # угода іменування: до полів з "__" додається назва класу: 
-        self.__access_token_dao: dao.AccessTokenDAO = None   # "DaoService._DaoService__user_dao". Це аналог "private"
+        self.__user_dao: dao.UserDAO = None 
+        self.__access_token_dao: dao.AccessTokenDAO = None   
         return
 
     def get_user_dao( self ) -> dao.UserDAO :
@@ -40,8 +40,6 @@ class DaoService :
             self.__access_token_dao = dao.AccessTokenDAO( self.__db_service.get_connection() )
         return self.__access_token_dao
 
-# print( DaoService.__user_dao )  # AttributeError: type object 'DaoService' has no attribute '__user_dao'
-# print( DaoService._DaoService__user_dao )  # OK
 
 dao_service: DaoService = None
 
@@ -52,10 +50,7 @@ class MainHandler( BaseHTTPRequestHandler ) :
     
     def do_GET( self ) -> None :
         print( self.path )    # вивід у консоль
-        path_parts = self.path.split( '/' )  # розділення запиту по /
-        # оскільки всі запити починаються з /, path_parts[0] - завжди порожній
-        # if path_parts[1] == "" :
-        #     path_parts[1] = "index.html"
+        path_parts = self.path.split( '/' )
         if self.path == '/' :
             self.path = '/index.html'
         # перевіряємо чи path_parts[1] відповідає за існуючий файл
@@ -105,7 +100,6 @@ class MainHandler( BaseHTTPRequestHandler ) :
         if user is None :
             self.send_401( "Credentials rejected" )
             return
-# Д.З. Реалізувати генерацію токену за авторизованим користувачем
         self.send_200( user.id )
         return 
 
@@ -131,7 +125,7 @@ class MainHandler( BaseHTTPRequestHandler ) :
     def flush_file( self, filename ) -> None :
         # Визначаємо розширення файлу
         extension = filename[ filename.rindex(".") + 1 : ]
-        # print( extension )
+
         # Встановлюємо тип (Content-Type)
         if extension == 'ico' :
             content_type = 'image/x-icon'
@@ -155,18 +149,17 @@ class MainHandler( BaseHTTPRequestHandler ) :
     # Override
     def log_request(self, code: int | str = ..., size: int | str = ...) -> None:
         # логування запиту у консоль
-        # return super().log_request(code, size)
         return
 
 
 def main() -> None :
     global dao_service
     http_server = HTTPServer( 
-        ( '127.0.0.1', 88 ),     # host + port = endpoint
+        ( '127.0.0.1', 88 ),
         MainHandler )
     try :
         print( "Server started" )
-        dao_service = DaoService( DbService() )   # ~ Inject
+        dao_service = DaoService( DbService() )
         http_server.serve_forever()       
     except :
         print( "Server stopped" )
