@@ -94,6 +94,7 @@ def create_table( db : mysql.connector.MySQLConnection ) -> None :
     finally :
         cursor.close()
     return 
+    print()
 
 
 def main( db_conf ) -> None :
@@ -110,6 +111,7 @@ def main( db_conf ) -> None :
         for d in select_dicts( connection ) :
             print( d["num"], d["str"] )
     return
+    print("created")
 
 
 if __name__ == "__main__" :

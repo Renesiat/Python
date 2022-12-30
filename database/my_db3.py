@@ -100,7 +100,8 @@ class UserDAO :
         return None
 
     def read_auth( self, login, password ) -> User | None :
-        user = ( self.read( login = login ) + (None,) )[0]
+        user = ( self.read( login = login ) + (None,) )[0]   # None - for empty list OR user
+        # оскільки видалення - це мітка часу, враховуємо це при авторизації
         if user \
             and user.del_dt == None \
             and self.hash_passw( password, user.salt ) == user.passw :
@@ -108,10 +109,13 @@ class UserDAO :
         return None
     
     def update( self, user: User ) -> bool :
+        # з user беремо id, інші поля оновлюються
+        # "UPDATE `users` u SET u.`login`= %(login)s, u.`name` = %(name)s   WHERE u.`id` = %(id)s "
         fields = user.__dict__.keys()
         sql = "UPDATE `users` u SET " + \
             ','.join( f"u.`{field.replace('passw', 'pass')}` = %({field})s"  for field in fields if field != 'id' ) + \
             " WHERE u.`id` = %(id)s "
+        # print( sql )
         try :
             cursor = self.db.cursor()
             cursor.execute( sql, user.__dict__ )
@@ -125,6 +129,9 @@ class UserDAO :
         return False
 
     def delete( self, user: User ) -> bool :
+        # через наявність реляцій у БД видаляти інформаційні одиниці ДУЖЕ не бажано
+        # одна з найпростіших реалізацій видалення - створення додаткового поля
+        # 'del_dt' з міткою часу моменту видалення. Складніше - ведення окремої таблиці видалень
         try :
             cursor = self.db.cursor()
             user.del_dt = time.strftime( '%Y-%m-%d %H:%M:%S', time.localtime() )
@@ -139,6 +146,12 @@ class UserDAO :
             except : pass
         return False
 
+# Д.З. скласти методи UserDAO:
+#  restore(user) - відновлення користувача (з видалених)
+#  is_login_free( login: str ) - який проводить пошук як серед активних, так і серед
+#   видалених користувачів (можна на базі read)
+# переконатись у встановленні Apache - веб-сервера
+
 
 def main( db_conf ) -> None :
     try :
@@ -148,32 +161,32 @@ def main( db_conf ) -> None :
         return
 
     print( "Connection OK" )
-    user = User()
-    user.login = "guest"
-    user.email = "guest@ukr.net"
-    user.name  = "Guest Walker"
-    user.passw = "123"
-    user.login = "user"
-    user.email = "user@ukr.net"
-    user.name  = "Experienced User"
-    user.passw = "123"
+    # user = User()
+    # user.login = "guest"
+    # user.email = "guest@ukr.net"
+    # user.name  = "Guest Walker"
+    # user.passw = "123"
+    # user.login = "user"
+    # user.email = "user@ukr.net"
+    # user.name  = "Experienced User"
+    # user.passw = "123"
     userDao = UserDAO( db )
-    userDao.create( user )
-    print( userDao.read() )
-    
-    (user,) = userDao.read( id = '!d8df8963-0c16-4c9a-a85e-b6c35dfaa48a' ) + (None,) ; print( user )    
-    (user,) = userDao.read( login = 'user' ) + (None,) ; print( user )    
-    (user,) = userDao.read( login = '!user' ) + (None,) ; print( user )    
-    print( (userDao.read( login = 'user' ) + (None,))[0] )
+    # userDao.create( user )
+    # print( userDao.read() )
+    #(user,) = userDao.read( id = 'd8df8963-0c16-4c9a-a85e-b6c35dfaa48a' ) + (None,) ; print( user )    
+    #(user,) = userDao.read( id = '!d8df8963-0c16-4c9a-a85e-b6c35dfaa48a' ) + (None,) ; print( user )    
+    #(user,) = userDao.read( login = 'user' ) + (None,) ; print( user )    
+    #(user,) = userDao.read( login = '!user' ) + (None,) ; print( user )    
+    # print( (userDao.read( login = 'user' ) + (None,))[0] )
 
-    print( userDao.read_auth( 'admin', '123' ) )
-    print( userDao.read_auth( 'admin', '1234' ) )
-    print( userDao.read_auth( 'odmin', '1234' ) )
-    ( user ) = userDao.read_auth( 'user', '123' )
+    # print( userDao.read_auth( 'admin', '123' ) )
+    # print( userDao.read_auth( 'admin', '1234' ) )
+    # print( userDao.read_auth( 'odmin', '1234' ) )
+    # ( user ) = userDao.read_auth( 'user', '123' )
     ( user ) = userDao.read_auth( 'guest', '123' )
-    user.email = "user@meta.ua"
-    userDao.update( user )
-    userDao.delete( user )
+    # user.email = "user@meta.ua"
+    # userDao.update( user )
+    # userDao.delete( user )
     print( user )
     return
 
@@ -191,3 +204,28 @@ if __name__ == "__main__" :
         "collation":   "utf8mb4_general_ci"
     }
     main( db_conf )
+
+# Організувати збереження конфігураційних даних (про підключення до БД)
+# у окремому файлі. Підключати файл у робочій програмі
+
+'''
+Скопіюємо таблицю (декларацію) з попереднього проєкту (Java)
+show create table users;
+CREATE TABLE `users` (
+  `id`     char(36)     NOT NULL DEFAULT uuid() COMMENT 'UUID',
+  `login`  varchar(64)  NOT NULL,
+  `pass`   char(40)     NOT NULL COMMENT 'SHA-160 hash',
+  `name`   varchar(128) NOT NULL,
+  `salt`   char(40)     DEFAULT NULL,
+  `avatar` varchar(64)  DEFAULT NULL COMMENT 'Avatar filename',
+  `email`  varchar(64)  DEFAULT NULL COMMENT 'User E-mail',
+  `email_code` char(6)  DEFAULT NULL COMMENT 'E-mail confirmation code',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+
+ALTER TABLE users ADD COLUMN del_dt DATETIME DEFAULT NULL ;
+
+ORM : відображення даних на об'єкти  -  cтворення класів, структура
+яких відповідає структурі таблиць
+
+'''

@@ -148,9 +148,10 @@ class UserDAO :
     def read_auth( self, login, password ) -> User | None :
         user = ( self.read( login = login ) + (None,) )[0]   # None - for empty list OR user
         # оскільки видалення - це мітка часу, враховуємо це при авторизації
+        # print( "id: ", user.id, user.del_dt, self.hash_passw(  user.salt,password ) ,user.passw )
         if user \
             and user.del_dt == None \
-            and self.hash_passw( password, user.salt ) == user.passw :
+            and self.hash_passw(  user.salt,password ) == user.passw :
                 return user
         return None
     
